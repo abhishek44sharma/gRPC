@@ -6,6 +6,7 @@ import (
 	"gRPC/greet/greetpb"
 	"log"
 	"net"
+	"strconv"
 
 	"google.golang.org/grpc"
 )
@@ -20,6 +21,21 @@ func (s *server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb
 		Result: result,
 	}
 	return resp, nil
+}
+
+func (s *server) GreetManyTimes(req *greetpb.ManyTimesGreetRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
+	fmt.Printf("Greet Many Times request received: %v\n", req)
+	name := req.GetGreeting().GetFirstName()
+	for i := 1; i < 10; i++ {
+		result := name + " " + strconv.Itoa(i)
+		resp := &greetpb.ManyTimesGreetResponse{
+			Greeting: result,
+		}
+		if err := stream.Send(resp); err != nil {
+			log.Fatalf("Error while seding response to stream: %v\n", err)
+		}
+	}
+	return nil
 }
 
 func main() {
