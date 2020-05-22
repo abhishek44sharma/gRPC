@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-func (s *server) Sum(ctx context.Context, req *calculatorpb.Request) (*calculatorpb.Response, error) {
+func (*server) Sum(ctx context.Context, req *calculatorpb.Request) (*calculatorpb.Response, error) {
 	fmt.Printf("Sum request received: %v\n", req)
 	firstNumber := req.GetFirstNumber()
 	secondNumber := req.GetSecondNumber()
