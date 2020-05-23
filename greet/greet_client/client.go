@@ -19,10 +19,11 @@ func main() {
 	defer cc.Close()
 
 	c := greetpb.NewGreetServiceClient(cc)
-	fmt.Printf("Connection created: %f", c)
+	fmt.Printf("Connection created\n")
 
-	//doUnary(c)
+	doUnary(c)
 
+	// Server Streaming
 	doServerStreaming(c)
 }
 
@@ -42,27 +43,26 @@ func doUnary(c greetpb.GreetServiceClient) {
 }
 
 func doServerStreaming(c greetpb.GreetServiceClient) {
-	fmt.Printf("Starting to do ServerStreaming gRPC...")
-	req := &greetpb.GreetManyTimesRequest{
+  fmt.Printf("Starting to do ServerStreaming gRPC...")
+	req := &greetpb.ManyTimesGreetRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Abhishek",
 			LastName:  "Sharma",
 		},
 	}
 
-	respStream, err := c.GreetManyTimes(context.Background(), req)
+	resStream, err := c.GreetManyTimes(context.Background(), req)
 	if err != nil {
-		log.Fatalf("Error while calling GreetManyTimes Service: %v\n", err)
+		log.Fatalf("Error while calling Greet Many Times Service: %v\n", err)
 	}
-
 	for {
-		mesg, err := respStream.Recv()
+		mesg, err := resStream.Recv()
 		if err == io.EOF {
-			// We've reached end of the file
+			// We've reached end of the streaming
 			break
 		} else if err != nil {
-			log.Fatalf("Error while reading stream: %v\n", err)
+			log.Fatalf("Error while reading response from stream: %v\n", err)
 		}
-		log.Printf("Response from GreetManyTimes: %s\n", mesg.GetResult())
+		fmt.Println(mesg.GetGreeting())
 	}
 }

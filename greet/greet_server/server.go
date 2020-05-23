@@ -24,16 +24,17 @@ func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.G
 	return resp, nil
 }
 
-func (*server) GreetManyTimes(req *greetpb.GreetManyTimesRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
-	fmt.Printf("GreetManyTime function is invoked: %v\n", req)
-	firstName := req.GetGreeting().GetFirstName()
-	for i := 0; i < 10; i++ {
-		result := "Hello " + firstName + " " + strconv.Itoa(i)
-		resp := &greetpb.GreetManyTimesResponse{
-			Result: result,
+func (s *server) GreetManyTimes(req *greetpb.ManyTimesGreetRequest, stream greetpb.GreetService_GreetManyTimesServer) error {
+	fmt.Printf("Greet Many Times request received: %v\n", req)
+	name := req.GetGreeting().GetFirstName()
+	for i := 1; i < 10; i++ {
+		result := name + " " + strconv.Itoa(i)
+		resp := &greetpb.ManyTimesGreetResponse{
+			Greeting: result,
 		}
-		stream.Send(resp)
-		time.Sleep(1000 * time.Millisecond)
+		if err := stream.Send(resp); err != nil {
+			log.Fatalf("Error while seding response to stream: %v\n", err)
+		}
 	}
 	return nil
 }
