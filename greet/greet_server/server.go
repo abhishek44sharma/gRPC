@@ -7,14 +7,15 @@ import (
 	"log"
 	"net"
 	"strconv"
+	"time"
 
 	"google.golang.org/grpc"
 )
 
 type server struct{}
 
-func (s *server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
-	fmt.Printf("Greet function was invoked with: %v\n", req)
+func (*server) Greet(ctx context.Context, req *greetpb.GreetRequest) (*greetpb.GreetResponse, error) {
+	fmt.Printf("Greet function was invoked: %v\n", req)
 	firstName := req.GetGreeting().GetFirstName()
 	result := "Hello " + firstName
 	resp := &greetpb.GreetResponse{
@@ -39,10 +40,12 @@ func (s *server) GreetManyTimes(req *greetpb.ManyTimesGreetRequest, stream greet
 }
 
 func main() {
+	fmt.Println("Starting Greet listener")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
+	fmt.Println("Started Greet listener")
 
 	s := grpc.NewServer()
 	greetpb.RegisterGreetServiceServer(s, &server{})

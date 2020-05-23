@@ -21,13 +21,14 @@ func main() {
 	c := greetpb.NewGreetServiceClient(cc)
 	fmt.Printf("Connection created\n")
 
-	// doUnary(c)
+	doUnary(c)
 
 	// Server Streaming
 	doServerStreaming(c)
 }
 
 func doUnary(c greetpb.GreetServiceClient) {
+	fmt.Printf("Starting to do Unary gRPC...")
 	req := &greetpb.GreetRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "ABHISHEK",
@@ -42,12 +43,14 @@ func doUnary(c greetpb.GreetServiceClient) {
 }
 
 func doServerStreaming(c greetpb.GreetServiceClient) {
+  fmt.Printf("Starting to do ServerStreaming gRPC...")
 	req := &greetpb.ManyTimesGreetRequest{
 		Greeting: &greetpb.Greeting{
 			FirstName: "Abhishek",
 			LastName:  "Sharma",
 		},
 	}
+
 	resStream, err := c.GreetManyTimes(context.Background(), req)
 	if err != nil {
 		log.Fatalf("Error while calling Greet Many Times Service: %v\n", err)
