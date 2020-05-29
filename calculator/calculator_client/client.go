@@ -106,33 +106,16 @@ func doBiDiStreaming(c calculatorpb.CalculatorServiceClient) {
 		return
 	}
 
-	requests := []*calculatorpb.FindMaxRequest{
-		&calculatorpb.FindMaxRequest{
-			Number: 1,
-		},
-		&calculatorpb.FindMaxRequest{
-			Number: 5,
-		},
-		&calculatorpb.FindMaxRequest{
-			Number: 3,
-		},
-		&calculatorpb.FindMaxRequest{
-			Number: 6,
-		},
-		&calculatorpb.FindMaxRequest{
-			Number: 2,
-		},
-		&calculatorpb.FindMaxRequest{
-			Number: 20,
-		},
-	}
-
 	waitc := make(chan struct{})
 
 	go func() {
-		for _, req := range requests {
-			fmt.Printf("Sending request to stream: %v\n", req)
-			if err := stream.Send(req); err != nil {
+		numbers := []int32{4, 7, 2, 19, 4, 6, 32}
+		for _, number := range numbers {
+			fmt.Printf("Sending request to stream: %v\n", number)
+			err := stream.Send(&calculatorpb.FindMaxRequest{
+				Number: number,
+			})
+			if err != nil {
 				log.Fatalf("Error while sending data to stream: %v\n", err)
 			}
 			time.Sleep(1000 * time.Millisecond)
@@ -147,6 +130,7 @@ func doBiDiStreaming(c calculatorpb.CalculatorServiceClient) {
 				break
 			} else if err != nil {
 				log.Fatalf("Error while receving data from stream: %v\n", err)
+				break
 			}
 			fmt.Printf("Response received: %v\n", resp.GetNumber())
 		}
