@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gRPC/calculator/calculatorpb"
+	"io"
 	"log"
 	"net"
 
@@ -43,6 +44,49 @@ func (s *server) PrimeNumberDecomposition(req *calculatorpb.PrimeNumberRequest, 
 		}
 	}
 	return nil
+}
+
+func (*server) ComputeAverage(stream calculatorpb.CalculatorService_ComputeAverageServer) error {
+	fmt.Printf("Compute Average function invoked to compute average\n")
+	count, sum := 0, int32(0)
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			//We've reached end of the input
+			result := &calculatorpb.AverageResponse{
+				Average: float32(sum) / float32(count),
+			}
+			return stream.SendAndClose(result)
+		} else if err != nil {
+			log.Fatalf("Error while receiving request from stream: %v\n", err)
+		}
+		count += 1
+		sum += req.GetNumber()
+	}
+}
+
+func (*server) FindMaximum(stream calculatorpb.CalculatorService_FindMaximumServer) error {
+	maxNumber := int32(0)
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
+			log.Fatalf("Error while receiving request from stream: %v\n", err)
+		}
+		number := req.GetNumber()
+		if number > maxNumber {
+			maxNumber = number
+			result := &calculatorpb.FindMaxResponse{
+				Number: maxNumber,
+			}
+			err := stream.Send(result)
+			if err != nil {
+				log.Fatalf("Error while sending data to client: %v\n", err)
+				return err
+			}
+		}
+	}
 }
 
 func main() {

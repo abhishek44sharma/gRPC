@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"gRPC/greet/greetpb"
+	"io"
 	"log"
 	"net"
 	"strconv"
@@ -36,6 +37,45 @@ func (s *server) GreetManyTimes(req *greetpb.ManyTimesGreetRequest, stream greet
 		}
 	}
 	return nil
+}
+
+func (s *server) LongGreet(stream greetpb.GreetService_LongGreetServer) error {
+	fmt.Printf("Long Greet function invoked with streaming request\n")
+	result := "Hello "
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			// We've reached end of stream
+			return stream.SendAndClose(&greetpb.LongGreetResponse{
+				Result: result,
+			})
+		} else if err != nil {
+			log.Fatalf("Error while reading from client stream: %v\n", err)
+		}
+		result += req.GetGreeting().GetFirstName() + " "
+	}
+}
+
+func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) error {
+	fmt.Printf("Greet Everyone function invoked with streaming request\n")
+
+	for {
+		req, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		} else if err != nil {
+			log.Fatalf("Error while reading client stream: %v\n", err)
+		}
+		firstName := req.GetGreeting().GetFirstName()
+		result := "Hello " + firstName + " !"
+		err = stream.Send(&greetpb.GreetEveryoneResponse{
+			Result: result,
+		})
+		if err != nil {
+			log.Fatalf("Error while sending data to client: %v\n", err)
+			return err
+		}
+	}
 }
 
 func main() {
