@@ -20,7 +20,25 @@ message DecompositionResponse {
     int32 decomposedNumber = 1;
 }
 
+message AverageRequest {
+    int32 number = 1;
+}
+
+message AverageResponse {
+    float average = 1;
+}
+
+message FindMaxRequest {
+    int32 number = 1;
+}
+
+message FindMaxResponse {
+    int32 number = 1;
+}
+
 service CalculatorService {
     rpc Sum(Request) returns (Response) {};
     rpc PrimeNumberDecomposition(PrimeNumberRequest) returns (stream DecompositionResponse) {};
+    rpc ComputeAverage(stream AverageRequest) returns (AverageResponse) {};
+    rpc FindMaximum(stream FindMaxRequest) returns (stream FindMaxResponse) {};
 }
